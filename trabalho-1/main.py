@@ -110,17 +110,20 @@ class App:
         self.root = root
         self.root.title("Sistema Gráfico 2D")
 
-        self.viewportLabel = tk.Label(root, text="Viewport")
-        self.viewportLabel.grid(column=1, row=0, rowspan=1, columnspan=1, sticky="w")
+        viewportFrame = tk.Frame(root)
+        viewportFrame.grid(column=1, row=0, columnspan=1, rowspan=12, sticky="nsew")
 
-        self.canvas = tk.Canvas(root, highlightthickness=1, highlightbackground="gray")
-        self.canvas.grid(column=1, row=1, columnspan=1, rowspan=5)
+        self.viewportLabel = tk.Label(viewportFrame, text="Viewport", bg="lightgray")
+        self.viewportLabel.grid(column=0, row=0, rowspan=1, columnspan=1, sticky="ew")
+
+        self.canvas = tk.Canvas(viewportFrame, highlightthickness=1, highlightbackground="gray")
+        self.canvas.grid(column=0, row=1, columnspan=1, sticky="nsew")
 
         self.graphics = GraphicsSystem(self.canvas)
 
         # Frame Menu de funções (/menu_frame)
         menu_frame = tk.Frame(self.root, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
-        menu_frame.grid(row=0, column=0, columnspan=1, rowspan=6, sticky="nsw")
+        menu_frame.grid(row=0, column=0, columnspan=1, rowspan=12, sticky="nsw")
         tk.Label(menu_frame, text="Menu de Funções:").grid(row=0, column=0, sticky="w")
 
         # Frame Menu de objetos (/menu_frame/objects_frame)
@@ -136,13 +139,13 @@ class App:
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
 
         # Frame Window (/menu_frame/window_frame)
-        window_frame = tk.Frame(menu_frame, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
+        window_frame = tk.Frame(menu_frame, highlightbackground="gray", highlightthickness=1, padx=4, pady=4, bg="lightgray")
         window_frame.grid(row=2, column=0)
-        tk.Label(window_frame, text="Window:").grid(row=0, column=0, sticky="w")
+        tk.Label(window_frame, text="Window:", bg="lightgray").grid(row=0, column=0, sticky="w")
         
-        tk.Label(window_frame, text="Passo:").grid(row=1, column=0, columnspan=1, sticky="w")
+        tk.Label(window_frame, text="Passo:", bg="lightgray").grid(row=1, column=0, columnspan=1, sticky="w")
         self.step = tk.Entry(window_frame, width=6).grid(row=1, column=1, padx=2, pady=2, sticky="ew")
-        tk.Label(window_frame, text="%").grid(row=1, column=2, columnspan=1, sticky="w")
+        tk.Label(window_frame, text="%", bg="lightgray").grid(row=1, column=2, columnspan=1, sticky="w")
 
         tk.Button(window_frame, text="In", command=lambda: None).grid(row=2, column=2)
         tk.Button(window_frame, text="Out", command=lambda: None).grid(row=4, column=2)
@@ -175,9 +178,9 @@ class App:
         tk.Button(buttons_frame, text="Z", command=lambda: None).pack(side=tk.LEFT, padx=5, pady=3)
 
         # Zoom (/menu_frame/window_frame)
-        zoom_frame = tk.Frame(window_frame)
+        zoom_frame = tk.Frame(window_frame, bg="lightgray")
         zoom_frame.grid(row=6, column=0, pady=4, columnspan=3, sticky="ew")
-        tk.Label(zoom_frame, text="Zoom").grid(row=0, column=0, sticky="w")
+        tk.Label(zoom_frame, text="Zoom", bg="lightgray").grid(row=0, column=0, sticky="w")
         tk.Button(zoom_frame, text="+", command=lambda: None).grid(row=0, column=1, padx=5)
         tk.Button(zoom_frame, text="-", command=lambda: None).grid(row=0, column=2, padx=5)
         
