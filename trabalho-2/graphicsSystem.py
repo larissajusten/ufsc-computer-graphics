@@ -10,7 +10,6 @@ class GraphicsSystem:
         self.canvas = canvas
         self.display_file = DisplayFile()
         self.origin = [0, 0]
-        self.scale = 1.0
 
         # Window (coordenadas do mundo)
         self.window_min = [-100.0, -100.0]

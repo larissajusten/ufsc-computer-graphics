@@ -8,17 +8,18 @@ INITIAL_DEGREE = 45
 
 # Trabalho 1.2 - Implementação de Transformações 2D e Coordenadas Homogêneas
 
-def set_example_data(self) -> List[Tuple[str, List[Tuple[float, float]]]]:
+# Data to test the system
+def set_example_data(self, graphics) -> List[Tuple[str, List[Tuple[float, float]]]]:
     objects = [
         Point("Ponto 1", [(0, 0)]),
         Segment("Segmento 1", [(10, 10), (50, 50)]),
         Wireframe("Polígono 1", [(20, 20), (30, 40), (40, 20)]),
+        Wireframe("Polígono 1", [(20, 20), (30, 40), (40, 20), (30, 20)]),
     ]
     
     for obj in objects:
-        self.graphics.display_file.add_object(obj)
-    self.graphics.draw()
-    return objects
+        graphics.display_file.add_object(obj)
+    graphics.draw()
 
 # ---------- Aplicação principal ----------
 class App:
@@ -26,8 +27,9 @@ class App:
         self.root = root
         self.root.title("Sistema Gráfico 2D")
         self.logs_data = []
+        self.selected_object = None
 
-        # Frame da Viewport
+        # Container "Viewport"
         viewport_frame = tk.Frame(root)
         viewport_frame.grid(column=1, row=0, columnspan=1, rowspan=12, sticky="nsew")
 
@@ -38,6 +40,7 @@ class App:
         self.canvas = tk.Canvas(canva_frame, highlightthickness=1, highlightbackground="gray")
         self.canvas.pack(fill="both", expand=True)
 
+        # Container Logs
         logs_frame = tk.LabelFrame(viewport_frame, text="Logs", highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
         logs_frame.grid(column=0, row=2, sticky="nsew")
         self.logs = tk.Text(logs_frame, height=5, wrap="word", state="disabled", bg="white", fg="black")
@@ -48,29 +51,26 @@ class App:
             self.logs.insert("end", log , "\n")
         self.logs.config(state="disabled")
 
+        # Initialize the graphics system
         self.graphics = GraphicsSystem(self.canvas)
-        # -- REMOVE COMENT 
-        # self.objects = self.graphics.display_file.objects
-        self.objects = set_example_data(self)
+        set_example_data(self, self.graphics)
 
-        self.selected_object = None
-
-        # Frame do Menu de Funções
+        # Container "Menu de Funções"
         menu_frame = tk.Frame(self.root, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
         menu_frame.grid(row=0, column=0, rowspan=12, sticky="nsw")
         tk.Label(menu_frame, text="Menu de Funções:").grid(row=0, column=0, sticky="w")
 
-        # Frame de Objetos
+        # Container "Objetos"
         objects_frame = tk.LabelFrame(menu_frame, text="Objetos", padx=4, pady=4)
         objects_frame.grid(row=1, column=0, sticky="ew")
         
-        choices_var = tk.StringVar(value=[obj.name for obj in self.objects])
+        choices_var = tk.StringVar(value=[obj.name for obj in self.graphics.display_file.objects])
         self.listbox = tk.Listbox(objects_frame, listvariable=choices_var, height=5, exportselection=False, highlightbackground="gray", highlightthickness=1)
         self.listbox.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
         self.update_objects_list()
 
-        # Frame da Window
+        # Container "Window"
         window_frame = tk.LabelFrame(menu_frame, text="Window", padx=4, pady=4, bg="lightgray")
         window_frame.grid(row=2, column=0, sticky="ew")
 
@@ -94,7 +94,7 @@ class App:
         tk.Button(window_frame, text="Right", command=lambda: [self.graphics.pan(int(self.step.get() or 10), 0), self.update_logs(f"Move Right in {self.step.get()} steps")]).grid(row=2, column=1, sticky="w")
         tk.Button(buttonDown_frame, text="Down", command=lambda: [self.graphics.pan(0, -int(self.step.get() or 10)), self.update_logs(f"Move Down in {self.step.get()} steps")]).pack()
 
-        # Frame de Rotação
+        # Container "Rotação"
         rotation_frame = tk.LabelFrame(window_frame, text="Rotação", padx=4, pady=4, bg="lightgray")
         rotation_frame.grid(row=4, column=0, columnspan=3, pady=4, sticky="ew")
 
@@ -107,7 +107,7 @@ class App:
         tk.Button(rotation_frame, text="X", command=lambda: [self.graphics.rotate("x", float(self.degree.get() or 0)), self.update_logs(f"Move {self.degree.get()}° in X")]).grid(row=1, column=0, padx=5, pady=3)
         tk.Button(rotation_frame, text="Y", command=lambda: [self.graphics.rotate("y", float(self.degree.get() or 0)), self.update_logs(f"Move {self.degree.get()}° in Y")]).grid(row=1, column=1, padx=5, pady=3)
 
-        # Frame de Zoom
+        # Container "Zoom"
         zoom_frame = tk.Frame(window_frame, bg="lightgray")
         zoom_frame.grid(row=5, column=0, pady=4, columnspan=3, sticky="ew")
     
@@ -168,7 +168,7 @@ class App:
         self.graphics.draw()
 
     def update_objects_list(self):
-        choices_var = tk.StringVar(value=[obj.name for obj in self.objects])
+        choices_var = tk.StringVar(value=[obj.name for obj in self.graphics.display_file.objects])
         self.listbox.config(listvariable=choices_var)
         self.root.after(500, self.update_objects_list)  # Update every 500ms
 
@@ -177,7 +177,7 @@ class App:
         index = widget.curselection()
         if index:
             selected_item = widget.get(index)
-            self.selected_object = next((obj for obj in self.objects if obj.name == selected_item), None)
+            self.selected_object = next((obj for obj in self.graphics.display_file.objects if obj.name == selected_item), None)
             self.logs_data.append(selected_item)
             self.update_logs(f"Objeto selecionado: {selected_item}")
 
@@ -194,8 +194,8 @@ class App:
         self.canvas.scan_dragto(event.x, event.y, gain=1)
 
     def zoom(self, event: tk.Event):
-        factor = 1.1 if (event.delta > 0 or event.num == 4) else 0.9
-        self.scale *= factor
+        factor = 0.9 if (event.delta > 0 or event.num == 4) else 1.1
+        self.graphics.zoom(factor)
         x = self.canvas.canvasx(event.x)
         y = self.canvas.canvasy(event.y)
         self.scale_all(x, y, factor)
