@@ -1,6 +1,5 @@
 import tkinter as tk
-from typing import List, Tuple, Union
-import math
+from typing import List, Tuple
 
 # Trabalho 1.1 - Sistema básico com Window e Viewport
 
@@ -106,20 +105,45 @@ class GraphicsSystem:
 # ---------- Aplicação principal ----------
 class App:
     def __init__(self, root):
+        self.objects = []
+
         self.root = root
         self.root.title("Sistema Gráfico 2D")
-        self.canvas = tk.Canvas(root, width=600, height=600, bg="white")
-        self.canvas.pack()
+
+        self.viewportLabel = tk.Label(root, text="Viewport", fg="black", anchor="w")
+        self.viewportLabel.grid(column=1, row=0, rowspan=1, columnspan=1, sticky="w")
+
+        self.canvas = tk.Canvas(root, highlightthickness=1, highlightbackground="gray")
+        self.canvas.grid(column=1, row=1, columnspan=1, rowspan=5)
 
         self.graphics = GraphicsSystem(self.canvas)
 
-        self.entry = tk.Entry(root, width=50)
-        self.entry.pack()
+        # Menu de funções
+        menu_frame = tk.Frame(self.root, bg="gray", highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
+        menu_frame.grid(row=0, column=0, columnspan=1, rowspan=6, sticky="nsw")
+        tk.Label(menu_frame, text="Menu de Funções:").grid(row=0, column=0, sticky="w")
 
-        self.type_var = tk.StringVar(value="Point")
-        tk.OptionMenu(root, self.type_var, "Point", "Segment", "Wireframe").pack()
+        # Menu de objetos
+        objects_frame = tk.Frame(menu_frame, padx=4, pady=4)
+        objects_frame.grid(row=1, column=0, sticky="nsw")
+        tk.Label(objects_frame, text="Objetos:").grid(row=1, column=0, sticky="w")
 
-        tk.Button(root, text="Adicionar", command=self.add_object).pack()
+        choices_var = tk.StringVar(value= [obj.name for obj in self.objects])
+
+        self.listbox = tk.Listbox(objects_frame, listvariable=choices_var, height=3, exportselection=False, highlightbackground="gray", highlightthickness=1)
+        self.listbox.grid(row=2, column=0, rowspan=2, padx=5, pady=5)
+
+        self.listbox.bind("<<ListboxSelect>>", self.on_select)
+
+        # Window
+        window_frame = tk.Frame(menu_frame, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
+        window_frame.grid(row=2, column=0, sticky="nsw")
+        tk.Label(window_frame, text="Window:").grid(row=0, column=0, sticky="w")
+        
+        tk.Label(window_frame, text="Passo:").grid(row=1, column=0, sticky="w")
+        self.passo = tk.Entry(window_frame).grid(row=1, column=1, padx=5, pady=5)
+        
+        #tk.Button(menu_frame, text="Adicionar", command=lambda: self.add_object()).grid(row=7, column=0, padx=5, pady=5)
 
         self.bind_keys()
 
@@ -131,22 +155,26 @@ class App:
         self.root.bind("<plus>", lambda e: self.graphics.zoom(0.9))
         self.root.bind("<minus>", lambda e: self.graphics.zoom(1.1))
 
-    def add_object(self):
-        coords = list(eval(self.entry.get()))
-        obj_type = self.type_var.get()
+    def on_select(event):
+        widget = event.widget
+        index = widget.curselection()
+        if index:
+            selected_item = widget.get(index)
+            print("Selecionado:", selected_item)
 
-        if obj_type == "Point" and len(coords) == 1:
-            obj = Point("Ponto", coords)
-        elif obj_type == "Segment" and len(coords) == 2:
-            obj = Segment("Segmento", coords)
-        elif obj_type == "Wireframe" and len(coords) >= 3:
-            obj = Wireframe("Wireframe", coords)
-        else:
-            print("Coordenadas inválidas para o tipo:", obj_type)
-            return
+    # def add_object(self, obj_type):
+    #     if obj_type == "Point" and len(coords) == 1:
+    #         obj = Point("Ponto", coords)
+    #     elif obj_type == "Segment" and len(coords) == 2:
+    #         obj = Segment("Segmento", coords)
+    #     elif obj_type == "Wireframe" and len(coords) >= 3:
+    #         obj = Wireframe("Wireframe", coords)
+    #     else:
+    #         print("Coordenadas inválidas para o tipo:", obj_type)
+    #         return
 
-        self.graphics.display_file.add_object(obj)
-        self.graphics.draw()
+    #     self.graphics.display_file.add_object(obj)
+    #     self.graphics.draw()
 
 # ---------- Rodar ----------
 if __name__ == "__main__":
