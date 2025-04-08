@@ -191,7 +191,8 @@ class App:
         y2_entry.grid(row=3, column=3, sticky="w")
 
     def show_wireframe_input(self, wireframe_frame):
-        tk.Label(wireframe_frame, text="Novo ponto").grid(row=0, column=0, columnspan=4, padx=(2,0), pady=(0, 5), sticky="w")
+        #Label Novo Ponto
+        tk.Label(wireframe_frame, text="Novo ponto:").grid(row=0, column=0, columnspan=4, padx=(2,0), pady=(0, 5), sticky="w")
         # x:
         tk.Label(wireframe_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
         x_entry = tk.Entry(wireframe_frame, width=5)
@@ -201,19 +202,30 @@ class App:
         y_entry = tk.Entry(wireframe_frame, width=5)
         y_entry.grid(row=1, column=3, sticky="w")
 
-        #####
-        tk.Label(wireframe_frame, text="Pontos adicionados:").grid(row=2, column=0, padx=(2,0), pady=(0,5))
-
         wireframe_points: List[Tuple[float, float]] = []
 
-        self.add_wireframe_points(wireframe_points, x_entry, y_entry)
+        #Botão de adicionar
+        add_button = tk.Button(wireframe_frame, text="Adicionar", command=lambda: self.add_wireframe_points(wireframe_points, x_entry, y_entry, point_list_box))
+        add_button.grid(row=3, column=0,columnspan=4, pady=5)
 
-    def add_wireframe_points(points_list: List, x_entry: tk.Entry, y_entry: tk.Entry):
+        #Label de Pontos adicionados
+        tk.Label(wireframe_frame, text="Pontos adicionados:").grid(row=4, column=0, columnspan=4, padx=(2,0), pady=(10,5), sticky="w")
+
+        #Listbox de pontos
+        point_list_box = point_listbox = tk.Listbox(wireframe_frame, height=5, width=30)
+        point_listbox.grid(row=5, column=0, columnspan=4, sticky="w")
+
+
+    def add_wireframe_points(self, points_list: List, x_entry: tk.Entry, y_entry: tk.Entry, list_box: tk.Listbox):
         try:
             x = float(x_entry.get())
             y = float(y_entry.get())
 
             points_list.append((x, y))
+            list_box.insert(tk.END, f"({x}, {y})")
+
+            x_entry.delete(0, tk.END)
+            y_entry.delete(0, tk.END)
 
             return points_list
         except ValueError:
@@ -251,10 +263,6 @@ class App:
         # ---------- Aba Wireframe ----------
         self.show_wireframe_input(wireframe_frame)
 
-        wireframe_points_frame = tk.Frame(wireframe_frame)
-        wireframe_points_frame.grid(row=2)
-        tk.Label(wireframe_points_frame, text="Pontos adicionados").grid(row=1, column=0)
-        
         # ---------- Aba Curvas ----------
 
         # ---------- Notebook ----------
