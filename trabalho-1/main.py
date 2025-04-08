@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import ttk
+
 from typing import List, Tuple, Union
 import math
 
@@ -113,13 +115,17 @@ class App:
 
         self.graphics = GraphicsSystem(self.canvas)
 
-        self.entry = tk.Entry(root, width=50)
-        self.entry.pack()
+        tk.Label(root, text="Teste").pack(anchor="w", padx=10)
+        self.entry = tk.Entry(root)
+        self.entry.pack(fill="x")
 
         self.type_var = tk.StringVar(value="Point")
         tk.OptionMenu(root, self.type_var, "Point", "Segment", "Wireframe").pack()
 
         tk.Button(root, text="Adicionar", command=self.add_object).pack()
+
+        tk.Button(root, text="Incluir Objeto", command=self.show_add_object_dialog).pack()
+
 
         self.bind_keys()
 
@@ -147,6 +153,88 @@ class App:
 
         self.graphics.display_file.add_object(obj)
         self.graphics.draw()
+
+    def show_point_input(self, point_frame):
+        tk.Label(point_frame, text="Coordenadas do Ponto").grid(row=0, column=0, columnspan=4, pady=(0, 5))
+        # x:
+        tk.Label(point_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
+        x_entry = tk.Entry(point_frame, width=5)
+        x_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
+        # y:
+        tk.Label(point_frame, text="y:").grid(row=1, column=2, sticky="w", padx=(0, 5))
+        y_entry = tk.Entry(point_frame, width=5)
+        y_entry.grid(row=1, column=3, sticky="w")
+
+    def show_axis_input(self, axis_frame):
+        #Ponto inicial
+        initial_point = tk.Frame(axis_frame)
+
+        tk.Label(axis_frame, text="Coordenadas do Ponto Inicial").grid(row=0, column=0, columnspan=4, pady=(0, 5), sticky="w")
+        #x1:
+        tk.Label(axis_frame, text="x1:").grid(row=1, column=0, sticky="w", padx=(0, 5))
+        x1_entry = tk.Entry(axis_frame, width=5)
+        x1_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
+        # y1:
+        tk.Label(axis_frame, text="y1:").grid(row=1, column=2, sticky="w", padx=(0, 5))
+        y1_entry = tk.Entry(axis_frame, width=5)
+        y1_entry.grid(row=1, column=3, sticky="w")
+
+        #Ponto final
+        end_point = tk.Frame(axis_frame)
+
+        tk.Label(axis_frame, text="Coordenadas do Ponto Final").grid(row=2, column=0, columnspan=4, pady=(20, 5), sticky="w")
+        #x2:
+        tk.Label(axis_frame, text="x2:").grid(row=3, column=0, sticky="w", padx=(0, 5))
+        x2_entry = tk.Entry(axis_frame, width=5)
+        x2_entry.grid(row=3, column=1, sticky="w", padx=(0, 15))
+        # y2:
+        tk.Label(axis_frame, text="y2:").grid(row=3, column=2, sticky="w", padx=(0, 5))
+        y2_entry = tk.Entry(axis_frame, width=5)
+        y2_entry.grid(row=3, column=3, sticky="w")
+
+    def show_add_object_dialog(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Incluir Objeto")
+
+        # ---------- Campo nome ----------
+        tk.Label(dialog, text="Nome").pack(anchor="w", padx=10)
+        name_entry = tk.Entry(dialog)
+        name_entry.pack(fill="x", padx=10, pady=(0, 10))
+
+        # ---------- Notebook ----------
+        notebook = ttk.Notebook(dialog)
+        notebook.pack(padx=10, pady=10)
+
+        # ---------- Abas ----------
+        point_frame = tk.Frame(notebook)
+        axis_frame = tk.Frame(notebook)
+        wireframe_frame = tk.Frame(notebook)
+
+        notebook.add(point_frame, text="Ponto")
+        notebook.add(axis_frame, text="Reta")
+        notebook.add(wireframe_frame, text="Wireframe")
+
+        # ---------- Aba Ponto ----------
+        self.show_point_input(point_frame)
+
+        # ---------- Aba Reta ----------
+        self.show_axis_input(axis_frame)
+
+        # ---------- Aba Wireframe ----------
+        tk.Label(wireframe_frame, text="Novo ponto").grid(row=0, column=0, columnspan=4, pady=(0, 5))
+        # x:
+        tk.Label(wireframe_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
+        x_entry = tk.Entry(wireframe_frame, width=5)
+        x_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
+        # y:
+        tk.Label(wireframe_frame, text="y:").grid(row=1, column=2, sticky="w", padx=(0, 5))
+        y_entry = tk.Entry(wireframe_frame, width=5)
+        y_entry.grid(row=1, column=3, sticky="w")
+        # ---------- Aba Curvas ----------
+
+        # ---------- Notebook ----------
+        # ---------- Notebook ----------
+        # ---------- Notebook ----------
 
 # ---------- Rodar ----------
 if __name__ == "__main__":
