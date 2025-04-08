@@ -110,7 +110,7 @@ class App:
         self.root = root
         self.root.title("Sistema Gráfico 2D")
 
-        self.viewportLabel = tk.Label(root, text="Viewport", fg="black", anchor="w")
+        self.viewportLabel = tk.Label(root, text="Viewport")
         self.viewportLabel.grid(column=1, row=0, rowspan=1, columnspan=1, sticky="w")
 
         self.canvas = tk.Canvas(root, highlightthickness=1, highlightbackground="gray")
@@ -118,14 +118,14 @@ class App:
 
         self.graphics = GraphicsSystem(self.canvas)
 
-        # Menu de funções
-        menu_frame = tk.Frame(self.root, bg="gray", highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
+        # Frame Menu de funções (/menu_frame)
+        menu_frame = tk.Frame(self.root, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
         menu_frame.grid(row=0, column=0, columnspan=1, rowspan=6, sticky="nsw")
         tk.Label(menu_frame, text="Menu de Funções:").grid(row=0, column=0, sticky="w")
 
-        # Menu de objetos
+        # Frame Menu de objetos (/menu_frame/objects_frame)
         objects_frame = tk.Frame(menu_frame, padx=4, pady=4)
-        objects_frame.grid(row=1, column=0, sticky="nsw")
+        objects_frame.grid(row=1, column=0)
         tk.Label(objects_frame, text="Objetos:").grid(row=1, column=0, sticky="w")
 
         choices_var = tk.StringVar(value= [obj.name for obj in self.objects])
@@ -135,14 +135,54 @@ class App:
 
         self.listbox.bind("<<ListboxSelect>>", self.on_select)
 
-        # Window
+        # Frame Window (/menu_frame/window_frame)
         window_frame = tk.Frame(menu_frame, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
-        window_frame.grid(row=2, column=0, sticky="nsw")
+        window_frame.grid(row=2, column=0)
         tk.Label(window_frame, text="Window:").grid(row=0, column=0, sticky="w")
         
-        tk.Label(window_frame, text="Passo:").grid(row=1, column=0, sticky="w")
-        self.passo = tk.Entry(window_frame).grid(row=1, column=1, padx=5, pady=5)
+        tk.Label(window_frame, text="Passo:").grid(row=1, column=0, columnspan=1, sticky="w")
+        self.step = tk.Entry(window_frame, width=6).grid(row=1, column=1, padx=2, pady=2, sticky="ew")
+        tk.Label(window_frame, text="%").grid(row=1, column=2, columnspan=1, sticky="w")
+
+        tk.Button(window_frame, text="In", command=lambda: None).grid(row=2, column=2)
+        tk.Button(window_frame, text="Out", command=lambda: None).grid(row=4, column=2)
+
+        buttonUp_frame = tk.Frame(window_frame)
+        buttonUp_frame.grid(row=2, column=0, columnspan=2)
+
+        buttonDown_frame = tk.Frame(window_frame)
+        buttonDown_frame.grid(row=4, column=0, columnspan=2)
+
+        tk.Button(buttonUp_frame, text="Up", command=lambda e: self.graphics.pan(0, self.step)).pack()
+        tk.Button(window_frame, text="Left", command=lambda e: self.graphics.pan(-self.step, 0)).grid(row=3, column=0, sticky="e")
+        tk.Button(window_frame, text="Right", command=lambda e: self.graphics.pan(self.step, 0)).grid(row=3, column=1, sticky="w")
+        tk.Button(buttonDown_frame, text="Down", command=lambda e: self.graphics.pan(0, -self.step)).pack()
         
+        # Frame Rotação (/menu_frame/window_frame/rotation_frame)
+        rotation_frame = tk.Frame(window_frame, highlightbackground="gray", highlightthickness=1, padx=4, pady=4)
+        rotation_frame.grid(row=5, column=0, pady=4, columnspan=3, sticky="ew")
+        tk.Label(rotation_frame, text="Rotação:").grid(row=0, column=0, columnspan=3, sticky="w")
+
+        tk.Label(rotation_frame, text="Graus:").grid(row=1, column=0, sticky="w")
+        self.degree = tk.Entry(rotation_frame, width=8).grid(row=1, column=1, columnspan=1)
+        tk.Label(rotation_frame, text="°").grid(row=1, column=2, sticky="w")
+
+        buttons_frame = tk.Frame(rotation_frame)
+        buttons_frame.grid(row=2, column=0, columnspan=12)
+
+        tk.Button(buttons_frame, text="X", command=lambda: None).pack(side=tk.LEFT, padx=5, pady=3)
+        tk.Button(buttons_frame, text="Y", command=lambda: None).pack(side=tk.LEFT, padx=5, pady=3)
+        tk.Button(buttons_frame, text="Z", command=lambda: None).pack(side=tk.LEFT, padx=5, pady=3)
+
+        # Zoom (/menu_frame/window_frame)
+        zoom_frame = tk.Frame(window_frame)
+        zoom_frame.grid(row=6, column=0, pady=4, columnspan=3, sticky="ew")
+        tk.Label(zoom_frame, text="Zoom").grid(row=0, column=0, sticky="w")
+        tk.Button(zoom_frame, text="+", command=lambda: None).grid(row=0, column=1, padx=5)
+        tk.Button(zoom_frame, text="-", command=lambda: None).grid(row=0, column=2, padx=5)
+        
+        tk.Button(window_frame, text="Set window", command=lambda: None).grid(row=7, column=0, columnspan=3, pady=5, sticky="ew")
+
         #tk.Button(menu_frame, text="Adicionar", command=lambda: self.add_object()).grid(row=7, column=0, padx=5, pady=5)
 
         self.bind_keys()
@@ -161,20 +201,6 @@ class App:
         if index:
             selected_item = widget.get(index)
             print("Selecionado:", selected_item)
-
-    # def add_object(self, obj_type):
-    #     if obj_type == "Point" and len(coords) == 1:
-    #         obj = Point("Ponto", coords)
-    #     elif obj_type == "Segment" and len(coords) == 2:
-    #         obj = Segment("Segmento", coords)
-    #     elif obj_type == "Wireframe" and len(coords) >= 3:
-    #         obj = Wireframe("Wireframe", coords)
-    #     else:
-    #         print("Coordenadas inválidas para o tipo:", obj_type)
-    #         return
-
-    #     self.graphics.display_file.add_object(obj)
-    #     self.graphics.draw()
 
 # ---------- Rodar ----------
 if __name__ == "__main__":
