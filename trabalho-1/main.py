@@ -167,8 +167,6 @@ class App:
 
     def show_axis_input(self, axis_frame):
         #Ponto inicial
-        initial_point = tk.Frame(axis_frame)
-
         tk.Label(axis_frame, text="Coordenadas do Ponto Inicial").grid(row=0, column=0, columnspan=4, pady=(0, 5), sticky="w")
         #x1:
         tk.Label(axis_frame, text="x1:").grid(row=1, column=0, sticky="w", padx=(0, 5))
@@ -191,6 +189,36 @@ class App:
         tk.Label(axis_frame, text="y2:").grid(row=3, column=2, sticky="w", padx=(0, 5))
         y2_entry = tk.Entry(axis_frame, width=5)
         y2_entry.grid(row=3, column=3, sticky="w")
+
+    def show_wireframe_input(self, wireframe_frame):
+        tk.Label(wireframe_frame, text="Novo ponto").grid(row=0, column=0, columnspan=4, padx=(2,0), pady=(0, 5), sticky="w")
+        # x:
+        tk.Label(wireframe_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
+        x_entry = tk.Entry(wireframe_frame, width=5)
+        x_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
+        # y:
+        tk.Label(wireframe_frame, text="y:").grid(row=1, column=2, sticky="w", padx=(0, 5))
+        y_entry = tk.Entry(wireframe_frame, width=5)
+        y_entry.grid(row=1, column=3, sticky="w")
+
+        #####
+        tk.Label(wireframe_frame, text="Pontos adicionados:").grid(row=2, column=0, padx=(2,0), pady=(0,5))
+
+        wireframe_points: List[Tuple[float, float]] = []
+
+        self.add_wireframe_points(wireframe_points, x_entry, y_entry)
+
+    def add_wireframe_points(points_list: List, x_entry: tk.Entry, y_entry: tk.Entry):
+        try:
+            x = float(x_entry.get())
+            y = float(y_entry.get())
+
+            points_list.append((x, y))
+
+            return points_list
+        except ValueError:
+            print("Coordenadas inválidas")
+        
 
     def show_add_object_dialog(self):
         dialog = tk.Toplevel(self.root)
@@ -221,15 +249,12 @@ class App:
         self.show_axis_input(axis_frame)
 
         # ---------- Aba Wireframe ----------
-        tk.Label(wireframe_frame, text="Novo pontooooo").grid(row=0, column=0, columnspan=4, pady=(0, 5))
-        # x:
-        tk.Label(wireframe_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
-        x_entry = tk.Entry(wireframe_frame, width=5)
-        x_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
-        # y:
-        tk.Label(wireframe_frame, text="y:").grid(row=1, column=2, sticky="w", padx=(0, 5))
-        y_entry = tk.Entry(wireframe_frame, width=5)
-        y_entry.grid(row=1, column=3, sticky="w")
+        self.show_wireframe_input(wireframe_frame)
+
+        wireframe_points_frame = tk.Frame(wireframe_frame)
+        wireframe_points_frame.grid(row=2)
+        tk.Label(wireframe_points_frame, text="Pontos adicionados").grid(row=1, column=0)
+        
         # ---------- Aba Curvas ----------
 
         # ---------- Notebook ----------
