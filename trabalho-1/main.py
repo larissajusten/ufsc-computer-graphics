@@ -221,7 +221,7 @@ class App:
         self.show_axis_input(axis_frame)
 
         # ---------- Aba Wireframe ----------
-        tk.Label(wireframe_frame, text="Novo ponto").grid(row=0, column=0, columnspan=4, pady=(0, 5))
+        tk.Label(wireframe_frame, text="Novo pontooooo").grid(row=0, column=0, columnspan=4, pady=(0, 5))
         # x:
         tk.Label(wireframe_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
         x_entry = tk.Entry(wireframe_frame, width=5)
