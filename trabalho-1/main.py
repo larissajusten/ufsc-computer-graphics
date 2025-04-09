@@ -1,6 +1,5 @@
 import tkinter as tk
 from typing import List, Tuple
-import math
 from graphicObject import GraphicObject, Point, Segment, Wireframe
 from graphicsSystem import GraphicsSystem
 from dialog import AddObjectDialog
@@ -9,18 +8,6 @@ INITIAL_STEP = 10
 INITIAL_DEGREE = 45
 
 # Trabalho 1.1 - Sistema básico com Window e Viewport
-
-def set_example_data(self) -> List[Tuple[str, List[Tuple[float, float]]]]:
-    objects = [
-        Point("Ponto 1", [(0, 0)]),
-        Segment("Segmento 1", [(10, 10), (50, 50)]),
-        Wireframe("Polígono 1", [(20, 20), (30, 40), (40, 20)]),
-    ]
-    
-    for obj in objects:
-        self.graphics.display_file.add_object(obj)
-    self.graphics.draw()
-    return objects
 
 # ---------- Aplicação principal ----------
 class App:
@@ -52,8 +39,7 @@ class App:
 
         self.graphics = GraphicsSystem(self.canvas)
         
-        self.objects = set_example_data(self)
-
+        self.objects: List[GraphicObject] = []
         self.selected_object = None
 
         # Frame do Menu de Funções
@@ -121,7 +107,6 @@ class App:
         tk.Button(window_frame, text="Adicionar", command=lambda: self.open_add_object_dialog()).grid(row=7, column=0, columnspan=3, sticky="ew")
 
 
-
         self.bind_keys()
 
     def bind_keys(self):
@@ -138,7 +123,12 @@ class App:
         self.root.bind("<Button-5>", self.zoom)
 
     def open_add_object_dialog(self):
-        AddObjectDialog(self.root, self.graphics)
+        AddObjectDialog(self.root, self.graphics, self.add_new_object)
+
+    def add_new_object(self, obj):
+        self.objects.append(obj)
+        self.update_objects_list()
+        self.update_logs(f"Objeto criado: {obj.name}")
 
 
     def add_object(self):

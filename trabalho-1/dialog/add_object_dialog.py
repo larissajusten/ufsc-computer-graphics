@@ -5,9 +5,10 @@ from graphicObject import Point, Segment, Wireframe
 from graphicsSystem import GraphicsSystem
 
 class AddObjectDialog:
-    def __init__(self, master, graphics: GraphicsSystem):
+    def __init__(self, master, graphics: GraphicsSystem, on_add_object_callback=None):
         self.master = master
         self.graphics = graphics
+        self.on_add_object_callback = on_add_object_callback
 
         # Widgets principais
         self.dialog = None
@@ -191,11 +192,11 @@ class AddObjectDialog:
                 return
 
             # Adiciona e desenha
-            print("debyg: Adiciona e desenha - start")
             self.graphics.display_file.add_object(obj)
             self.graphics.draw()
+
+            self.on_add_object_callback(obj)            
             self.dialog.destroy()
-            print("debyg: Adiciona e desenha - end")
 
             print("debug: AddObjectDialog.on_ok() - end")
 
