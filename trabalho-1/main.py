@@ -165,6 +165,8 @@ class App:
         y_entry = tk.Entry(point_frame, width=5)
         y_entry.grid(row=1, column=3, sticky="w")
 
+        return x_entry, y_entry
+
     def show_axis_input(self, axis_frame):
         #Ponto inicial
         tk.Label(axis_frame, text="Coordenadas do Ponto Inicial").grid(row=0, column=0, columnspan=4, pady=(0, 5), sticky="w")
@@ -176,6 +178,7 @@ class App:
         tk.Label(axis_frame, text="y1:").grid(row=1, column=2, sticky="w", padx=(0, 5))
         y1_entry = tk.Entry(axis_frame, width=5)
         y1_entry.grid(row=1, column=3, sticky="w")
+
 
         #Ponto final
         end_point = tk.Frame(axis_frame)
@@ -189,6 +192,8 @@ class App:
         tk.Label(axis_frame, text="y2:").grid(row=3, column=2, sticky="w", padx=(0, 5))
         y2_entry = tk.Entry(axis_frame, width=5)
         y2_entry.grid(row=3, column=3, sticky="w")
+
+        return x1_entry, y1_entry, x2_entry, y2_entry
 
     def show_wireframe_input(self, wireframe_frame):
         #Label Novo Ponto
@@ -215,6 +220,8 @@ class App:
         point_list_box = point_listbox = tk.Listbox(wireframe_frame, height=5, width=30)
         point_listbox.grid(row=5, column=0, columnspan=4, sticky="w")
 
+        return wireframe_points, point_list_box
+
 
     def add_wireframe_points(self, points_list: List, x_entry: tk.Entry, y_entry: tk.Entry, list_box: tk.Listbox):
         try:
@@ -230,7 +237,50 @@ class App:
             return points_list
         except ValueError:
             print("Coordenadas inválidas")
-        
+    
+    def on_ok(self, dialog, name_entry, tab_index,
+          x_entry=None, y_entry=None,
+          x1_entry=None, y1_entry=None, x2_entry=None, y2_entry=None,
+          wireframe_points=None):
+        try:
+            name = name_entry.get().strip() or "Objeto"
+
+            if tab_index == 0 and x_entry and y_entry:
+                # Aba Ponto
+                x = float(x_entry.get())
+                y = float(y_entry.get())
+                obj = Point(name, [(x, y)])
+
+            elif tab_index == 1 and all([x1_entry, y1_entry, x2_entry, y2_entry]):
+                # Aba Reta
+                x1 = float(x1_entry.get())
+                y1 = float(y1_entry.get())
+                x2 = float(x2_entry.get())
+                y2 = float(y2_entry.get())
+                obj = Segment(name, [(x1, y1), (x2, y2)])
+
+            elif tab_index == 2 and wireframe_points is not None:
+                # Aba Wireframe
+                if len(wireframe_points) < 3:
+                    print("Wireframe precisa de pelo menos 3 pontos.")
+                    return
+                obj = Wireframe(name, wireframe_points.copy())
+
+            else:
+                print("Tipo de objeto ou parâmetros inválidos.")
+                return
+
+            # Adiciona e desenha
+            self.graphics.display_file.add_object(obj)
+            self.graphics.draw()
+            dialog.destroy()
+
+        except ValueError:
+            print("Erro: valores inválidos nos campos")
+
+    def on_cancel(self, dialog):
+        dialog.destroy()
+   
 
     def show_add_object_dialog(self):
         dialog = tk.Toplevel(self.root)
@@ -255,19 +305,33 @@ class App:
         notebook.add(wireframe_frame, text="Wireframe")
 
         # ---------- Aba Ponto ----------
-        self.show_point_input(point_frame)
+        x_entry, y_entry = self.show_point_input(point_frame)
 
         # ---------- Aba Reta ----------
-        self.show_axis_input(axis_frame)
+        x1_entry, y1_entry, x2_entry, y2_entry = self.show_axis_input(axis_frame)
 
         # ---------- Aba Wireframe ----------
-        self.show_wireframe_input(wireframe_frame)
+        wireframe_points, point_list_box = self.show_wireframe_input(wireframe_frame)
 
         # ---------- Aba Curvas ----------
 
-        # ---------- Notebook ----------
-        # ---------- Notebook ----------
-        # ---------- Notebook ----------
+        # ---------- Botões ----------
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(pady=10)
+
+        tk.Button(button_frame, text="Cancelar",
+            command=lambda: self.on_cancel(dialog)).grid(row=0, column=0, padx=10)
+
+        tk.Button(button_frame, text="OK",
+            command=lambda: self.on_ok(
+                dialog,
+                name_entry,
+                notebook.index(notebook.select()),
+                x_entry, y_entry,
+                x1_entry, y1_entry, x2_entry, y2_entry,
+                wireframe_points
+            )).grid(row=0, column=1, padx=10)
+
 
 # ---------- Rodar ----------
 if __name__ == "__main__":
