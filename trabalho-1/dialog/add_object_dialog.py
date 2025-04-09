@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from typing import List, Tuple
-from main import Point, Segment, Wireframe 
+from graphicObject import Point, Segment, Wireframe 
+from graphicsSystem import GraphicsSystem
 
 class AddObjectDialog:
-    def __init__(self, master, graphics):
+    def __init__(self, master, graphics: GraphicsSystem):
         self.master = master
         self.graphics = graphics
 
@@ -119,12 +120,12 @@ class AddObjectDialog:
         tk.Label(self.wireframe_frame, text="Novo ponto:").grid(row=0, column=0, columnspan=4, padx=(2,0), pady=(0, 5), sticky="w")
         # x:
         tk.Label(self.wireframe_frame, text="x:").grid(row=1, column=0, sticky="w", padx=(0, 5))
-        self.x_entry = tk.Entry(self.wireframe_frame, width=5)
-        self.x_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
+        self.wf_x_entry = tk.Entry(self.wireframe_frame, width=5)
+        self.wf_x_entry.grid(row=1, column=1, sticky="w", padx=(0, 15))
         # y:
         tk.Label(self.wireframe_frame, text="y:").grid(row=1, column=2, sticky="w", padx=(0, 5))
-        self.y_entry = tk.Entry(self.wireframe_frame, width=5)
-        self.y_entry.grid(row=1, column=3, sticky="w")
+        self.wf_y_entry = tk.Entry(self.wireframe_frame, width=5)
+        self.wf_y_entry.grid(row=1, column=3, sticky="w")
 
         
         #Botão de adicionar
@@ -155,17 +156,21 @@ class AddObjectDialog:
         self.dialog.destroy()
 
     def on_ok(self):
+        print("debug: AddObjectDialog.on_ok() - start")
         try:
+            print("debug: entrando no try")
             name = self.name_entry.get().strip() or "Objeto"
             tab_index = self.notebook.index(self.notebook.select())
 
             if tab_index == 0 and self.x_entry and self.y_entry:
+                print(f"debug: entrou na condicional do(a) {name} - tabIndex: {tab_index}, x: {self.x_entry.get()}, y: {self.y_entry.get()}")
                 # Aba Ponto
                 x = float(self.x_entry.get())
                 y = float(self.y_entry.get())
                 obj = Point(name, [(x, y)])
 
             elif tab_index == 1 and all([self.x1_entry, self.y1_entry, self.x2_entry, self.y2_entry]):
+                print(f"debug: entrou na condicional do(a) {name} - tabIndex: {tab_index}")
                 # Aba Reta
                 x1 = float(self.x1_entry.get())
                 y1 = float(self.y1_entry.get())
@@ -174,6 +179,7 @@ class AddObjectDialog:
                 obj = Segment(name, [(x1, y1), (x2, y2)])
 
             elif tab_index == 2 and self.wireframe_points is not None:
+                print(f"debug: entrou na condicional do(a) {name} - tabIndex: {tab_index}")
                 # Aba Wireframe
                 if len(self.wireframe_points) < 3:
                     print("Wireframe precisa de pelo menos 3 pontos.")
@@ -185,9 +191,13 @@ class AddObjectDialog:
                 return
 
             # Adiciona e desenha
+            print("debyg: Adiciona e desenha - start")
             self.graphics.display_file.add_object(obj)
             self.graphics.draw()
             self.dialog.destroy()
+            print("debyg: Adiciona e desenha - end")
+
+            print("debug: AddObjectDialog.on_ok() - end")
 
         except ValueError:
             print("Erro: valores inválidos nos campos")
