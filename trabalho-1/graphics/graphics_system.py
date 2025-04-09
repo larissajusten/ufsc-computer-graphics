@@ -1,5 +1,4 @@
-from graphicObject import GraphicObject, Point, Segment, Wireframe
-from displayFile import DisplayFile
+from models import GraphicObject, Point, Segment, Wireframe, DisplayFile
 import tkinter as tk
 import math
 from typing import Tuple
