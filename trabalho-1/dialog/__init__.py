@@ -1,0 +1,1 @@
+from .add_object_dialog import AddObjectDialog
