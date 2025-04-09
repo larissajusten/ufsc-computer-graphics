@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from typing import List, Tuple
-from graphicObject import Point, Segment, Wireframe 
-from graphicsSystem import GraphicsSystem
+from models import Point, Segment, Wireframe 
+from graphics import GraphicsSystem
 
 class AddObjectDialog:
     def __init__(self, master, graphics: GraphicsSystem, on_add_object_callback=None):
