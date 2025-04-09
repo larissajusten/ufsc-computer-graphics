@@ -1,152 +1,13 @@
 import tkinter as tk
 from typing import List, Tuple
-import math
+from graphicObject import GraphicObject, Point, Segment, Wireframe
+from graphicsSystem import GraphicsSystem
+from dialog import AddObjectDialog
 
 INITIAL_STEP = 10
 INITIAL_DEGREE = 45
 
 # Trabalho 1.1 - Sistema básico com Window e Viewport
-
-def set_example_data(self) -> List[Tuple[str, List[Tuple[float, float]]]]:
-    objects = [
-        Point("Ponto 1", [(0, 0)]),
-        Segment("Segmento 1", [(10, 10), (50, 50)]),
-        Wireframe("Polígono 1", [(20, 20), (30, 40), (40, 20)]),
-    ]
-    
-    for obj in objects:
-        self.graphics.display_file.add_object(obj)
-    self.graphics.draw()
-    return objects
-
-# ---------- Classes base ----------
-class GraphicObject:
-    def __init__(self, name: str, coordinates: List[Tuple[float, float]]):
-        self.name = name
-        self.coordinates = coordinates
-
-    def get_type(self):
-        return self.__class__.__name__
-
-class Point(GraphicObject):
-    pass
-
-class Segment(GraphicObject):
-    pass
-
-class Wireframe(GraphicObject):  # Polígono (lista de pontos interligados)
-    pass
-
-# ---------- Display File ----------
-class DisplayFile:
-    def __init__(self):
-        self.objects: List[GraphicObject] = []
-
-    def add_object(self, obj: GraphicObject):
-        self.objects.append(obj)
-
-# ---------- Sistema Gráfico ----------
-class GraphicsSystem:
-    def __init__(self, canvas: tk.Canvas):
-        self.canvas = canvas
-        self.display_file = DisplayFile()
-        self.origin = [0, 0]
-        self.scale = 1.0
-
-        # Window (coordenadas do mundo)
-        self.window_min = [-100.0, -100.0]
-        self.window_max = [100.0, 100.0]
-
-        # Viewport (coordenadas da tela)
-        self.viewport = [0, 0, int(canvas["width"]), int(canvas["height"])]
-
-    def draw(self):
-        self.canvas.delete("all")
-        for obj in self.display_file.objects:
-            self.draw_object(obj)
-
-    def reset(self):
-        self.window_min = [-100.0, -100.0]
-        self.window_max = [100.0, 100.0]
-        self.draw()
-
-    def window_to_viewport(self, xw, yw) -> Tuple[int, int]:
-        wx_min, wy_min = self.window_min
-        wx_max, wy_max = self.window_max
-        vx_min, vy_min, vx_max, vy_max = self.viewport
-
-        # Normalização
-        x_norm = (xw - wx_min) / (wx_max - wx_min)
-        y_norm = (yw - wy_min) / (wy_max - wy_min)
-
-        # Escala uniforme (sem distorção)
-        scale = min(
-            (vx_max - vx_min) / (wx_max - wx_min),
-            (vy_max - vy_min) / (wy_max - wy_min)
-        )
-
-        # Centro da viewport
-        cx = (vx_max + vx_min) / 2
-        cy = (vy_max + vy_min) / 2
-
-        # Viewport coordenadas
-        xv = cx + (x_norm - 0.5) * scale * (wx_max - wx_min)
-        yv = cy - (y_norm - 0.5) * scale * (wy_max - wy_min)  # Inverter y
-
-        return int(xv), int(yv)
-
-    def draw_object(self, obj: GraphicObject):
-        coords = [self.window_to_viewport(x, y) for x, y in obj.coordinates]
-
-        if isinstance(obj, Point):
-            x, y = coords[0]
-            self.canvas.create_oval(x-2, y-2, x+2, y+2, fill="black")
-        elif isinstance(obj, Segment):
-            self.canvas.create_line(*coords[0], *coords[1], fill="blue")
-        elif isinstance(obj, Wireframe):
-            for i in range(len(coords)):
-                x1, y1 = coords[i]
-                x2, y2 = coords[(i + 1) % len(coords)]
-                self.canvas.create_line(x1, y1, x2, y2, fill="green")
-
-    def pan(self, dx, dy):
-        self.window_min[0] += dx
-        self.window_max[0] += dx
-        self.window_min[1] += dy
-        self.window_max[1] += dy
-        self.draw()
-
-    def zoom(self, factor):
-        cx = (self.window_min[0] + self.window_max[0]) / 2
-        cy = (self.window_min[1] + self.window_max[1]) / 2
-        w = (self.window_max[0] - self.window_min[0]) * factor
-        h = (self.window_max[1] - self.window_min[1]) * factor
-        self.window_min = [cx - w / 2, cy - h / 2]
-        self.window_max = [cx + w / 2, cy + h / 2]
-        self.draw()
-
-    def rotate(self, axis, angle):
-        # Convert angle to radians
-        angle_rad = math.radians(angle)
-
-        # Rotation around the x-axis
-        if axis == "x":
-            for obj in self.display_file.objects:
-                for i, (x, y) in enumerate(obj.coordinates):
-                    new_x = x
-                    new_y = y * math.cos(angle_rad) - x * math.sin(angle_rad)
-                    obj.coordinates[i] = (new_x, new_y)
-
-        # Rotation around the y-axis
-        elif axis == "y":
-            for obj in self.display_file.objects:
-                for i, (x, y) in enumerate(obj.coordinates):
-                    new_x = x * math.cos(angle_rad) - y * math.sin(angle_rad)
-                    new_y = x * math.sin(angle_rad) + y * math.cos(angle_rad)
-                    obj.coordinates[i] = (new_x, new_y)
-
-        self.draw()
-        pass
 
 # ---------- Aplicação principal ----------
 class App:
@@ -177,10 +38,8 @@ class App:
         self.logs.config(state="disabled")
 
         self.graphics = GraphicsSystem(self.canvas)
-        # -- REMOVE COMENT 
-        # self.objects = self.graphics.display_file.objects
-        self.objects = set_example_data(self)
-
+        
+        self.objects: List[GraphicObject] = []
         self.selected_object = None
 
         # Frame do Menu de Funções
@@ -247,6 +106,7 @@ class App:
 
         tk.Button(window_frame, text="Adicionar", command=lambda: self.open_add_object_dialog()).grid(row=7, column=0, columnspan=3, sticky="ew")
 
+
         self.bind_keys()
 
     def bind_keys(self):
@@ -263,19 +123,12 @@ class App:
         self.root.bind("<Button-5>", self.zoom)
 
     def open_add_object_dialog(self):
-        self.add_object_window = tk.Toplevel(self.root)
-        self.add_object_window.title("Adicionar Objeto")
+        AddObjectDialog(self.root, self.graphics, self.add_new_object)
 
-        tk.Label(self.add_object_window, text="Tipo de Objeto:").grid(row=0, column=0, sticky="w")
-        self.type_var = tk.StringVar(value="Point")
-        self.type_menu = tk.OptionMenu(self.add_object_window, self.type_var, "Point", "Segment", "Wireframe")
-        self.type_menu.grid(row=0, column=1, padx=5, pady=5)
-
-        tk.Label(self.add_object_window, text="Coordenadas:").grid(row=1, column=0, sticky="w")
-        self.entry = tk.Entry(self.add_object_window)
-        self.entry.grid(row=1, column=1, padx=5, pady=5)
-
-        tk.Button(self.add_object_window, text="Adicionar", command=self.add_object).grid(row=2, columnspan=2, pady=5)
+    def add_new_object(self, obj):
+        self.objects.append(obj)
+        self.update_objects_list()
+        self.update_logs(f"Objeto criado: {obj.name}")
 
 
     def add_object(self):
@@ -331,6 +184,7 @@ class App:
     def scale_all(self, x, y, scale):
         self.canvas.scale("all", x, y, scale, scale)
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+ 
 
 # ---------- Rodar ----------
 if __name__ == "__main__":
