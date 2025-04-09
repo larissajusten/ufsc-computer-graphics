@@ -1,5 +1,5 @@
 from typing import List
-from graphicObject import GraphicObject
+from .objects import GraphicObject
 
 # ---------- Display File ----------
 class DisplayFile:
